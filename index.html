@@ -717,7 +717,7 @@ function buildPlayers(){
   return Array.from({length:+$("playerCount").value},(_,i)=>({name:name(i),score:0,computer:false,hints:2}));
 }
 function startGame(){
-  clearTimers();gameToken++;players=buildPlayers();currentPlayer=0;level=1;
+  clearTimers();gameToken++;players=buildPlayers();currentPlayer=0;level=1;elapsedSec = 0;
   $("setup").classList.add("hidden");$("game").classList.remove("hidden");
   $("pauseOverlay").classList.remove("show");$("resultOverlay").classList.remove("show");
   startStage();
@@ -759,7 +759,7 @@ function startStage(){
   moves=matchedPairs=0;roundActors=new Set();memory=new Map();cardId=0;
   $("pauseOverlay").classList.remove("show");$("resultOverlay").classList.remove("show");
   const c=competition()?{count:competitionSize,time:0,moves:0,hints:2}:config();
-  deckSize=c.count;elapsedSec=0;$("elapsedVal").textContent=fmtTime(elapsedSec);
+  deckSize=c.count;  if (level === 1 && !competition()) { elapsedSec = 0; }$("elapsedVal").textContent=fmtTime(elapsedSec);
  timeLimit=c.time; timeLeft=c.time; moveLimit=c.moves; hints=c.hints;
   players.forEach(p=>{ p.score=0; p.hints=c.hints; });
   $("gameTitle").textContent=competition()?(isAI()?"رقابت با کامپیوتر":"چندنفره محلی"):`مرحله ${fa(level)} از ۵۰`;
