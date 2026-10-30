@@ -823,7 +823,7 @@ function resolvePair(){
   if(!competition()&&match){
     resetSelection();
     if(matchedPairs===config().count/2){finishLevel();return}
-    locked=false;updateHud();return;
+    locked=false;updateHud();hintLabel();return;
   }
   if(competition()&&match){
     resetSelection();
@@ -838,6 +838,7 @@ function resolvePair(){
     resetSelection();
     if(!competition()){
       locked=false;
+      hintLabel();
       if(moveLimit&&moves>=moveLimit){failLevel("تعداد حرکت‌ها تمام شد.");return}
       $("status").textContent=timeLimit?"قبل از تمام‌شدن زمان، همه جفت‌ها را پیدا کن.":"ادامه بده؛ جفت‌های بیشتری پیدا کن.";
       return;
