@@ -878,12 +878,23 @@ function updateHud(){
   $("progressBar").style.width=pct+"%";$("progressText").textContent=fa(pct)+"٪";
 }
   function hintLabel(){
+    const isLocal = (mode === "local");
+  const hintBtn = $("hintBtn");
+  
+  if (isLocal) {
+    hintBtn.style.display = "none";
+    return;
+  } else {
+    hintBtn.style.display = "inline-flex"; // یا inline-block بر اساس استایل اصلی دکمه
+  }
     const available = competition() ? (current()?.computer ? 0 : (current()?.hints || 0)) : hints;
     $("hintBtn").textContent = `💡 راهنما (${fa(available)})`;
     $("hintBtn").disabled = available <= 0 || locked || paused || ended || first !== null;
   }
 
 function useHint(){
+   if (mode === "local") return;
+
   if(locked||paused||ended||(competition()?(current()?.hints||0)<=0:hints<=0))return;
   if(first){$("message").textContent="ابتدا انتخاب فعلی را کامل کن، سپس از راهنما استفاده کن.";hintLabel();return}
   const groups=new Map();
