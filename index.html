@@ -1,0 +1,1079 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>بازی حافظه</title>
+<style>
+
+:root{
+  color-scheme:dark;
+  --bg:#070b18;
+  --bg-2:#10152b;
+  --panel:rgba(17,24,48,.82);
+  --panel-solid:#111830;
+  --panel-2:#1a2342;
+  --panel-3:#222d51;
+  --text:#f4f7ff;
+  --muted:#9ba9c9;
+  --blue:#6d8cff;
+  --cyan:#43e6f5;
+  --purple:#a879ff;
+  --pink:#ff6cc8;
+  --green:#50f0b0;
+  --red:#ff6688;
+  --gold:#ffd166;
+  --line:rgba(174,193,255,.16);
+  --shadow:0 24px 70px rgba(0,0,0,.36);
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+  position:relative;isolation:isolate;margin:0;min-height:100vh;color:var(--text);
+  background:
+    radial-gradient(ellipse at 12% 4%,rgba(104,74,255,.22),transparent 36%),
+    radial-gradient(ellipse at 88% 18%,rgba(28,211,232,.13),transparent 32%),
+    radial-gradient(ellipse at 50% 100%,rgba(255,74,179,.08),transparent 45%),
+    linear-gradient(145deg,#090d1e 0%,#0b1022 48%,#090d1c 100%);
+  font:15px/1.65 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  overflow-x:hidden;
+}
+body::before,body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+}
+body::before{
+  opacity:.22;
+  background-image:linear-gradient(rgba(133,157,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(133,157,255,.07) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,black,transparent 82%);
+}
+body::after{
+  background:
+    radial-gradient(circle at 8% 28%,rgba(67,230,245,.16) 0 1px,transparent 2px),
+    radial-gradient(circle at 82% 14%,rgba(255,108,200,.2) 0 1px,transparent 2px),
+    radial-gradient(circle at 90% 76%,rgba(168,121,255,.22) 0 2px,transparent 3px),
+    radial-gradient(circle at 18% 84%,rgba(255,209,102,.18) 0 1px,transparent 2px);
+}
+button,input,select{font:inherit}
+button{
+  position:relative;isolation:isolate;overflow:hidden;
+  border:1px solid rgba(185,202,255,.18);border-radius:13px;padding:10px 15px;
+  background:linear-gradient(145deg,#253052,#1a2340);color:var(--text);font-weight:750;cursor:pointer;
+  box-shadow:0 5px 16px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.07);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease;
+}
+button::before{
+  content:"";position:absolute;inset:0;z-index:-1;opacity:0;
+  background:linear-gradient(110deg,transparent,rgba(255,255,255,.12),transparent);
+  transform:translateX(-110%);transition:transform .45s ease,opacity .2s ease;
+}
+button:hover:not(:disabled){
+  transform:translateY(-2px);border-color:rgba(130,207,255,.5);
+  box-shadow:0 9px 25px rgba(0,0,0,.24),0 0 0 1px rgba(109,140,255,.08);
+}
+button:hover:not(:disabled)::before{opacity:1;transform:translateX(110%)}
+button:active:not(:disabled){transform:translateY(0) scale(.985)}
+button:focus-visible,input:focus-visible,select:focus-visible,.card:focus-visible{
+  outline:2px solid var(--cyan);outline-offset:3px;
+}
+button:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.5)}
+.primary{
+  color:#07111f;background:linear-gradient(115deg,#64e8f5,#7d9bff 55%,#b58bff);
+  border-color:transparent;box-shadow:0 8px 24px rgba(90,150,255,.25),inset 0 1px 0 rgba(255,255,255,.5);
+}
+.success{color:#041b16;background:linear-gradient(120deg,#50f0b0,#28cda5);border-color:transparent}
+.purple{background:linear-gradient(120deg,#9a71ff,#d26bff);border-color:transparent;color:#fff}
+.hidden{display:none!important}
+.app{position:relative;width:min(1120px,100%);margin:auto;padding:24px}
+header{text-align:center;margin:5px 0 25px}
+h1{
+  display:inline-block;position:relative;margin:0;letter-spacing:-1.4px;
+  font-size:clamp(31px,5vw,47px);font-weight:900;line-height:1.25;
+  color:#fff;text-shadow:0 0 26px rgba(109,140,255,.24);
+}
+h1::after{
+  content:"";display:block;width:76px;height:4px;border-radius:99px;margin:10px auto 0;
+  background:linear-gradient(90deg,var(--cyan),var(--blue),var(--pink));
+  box-shadow:0 0 18px rgba(67,230,245,.32);
+}
+.subtitle{color:#aab8da;margin-top:9px;font-size:14px;letter-spacing:.1px}
+.panel{
+  position:relative;padding:clamp(16px,3vw,28px);border-radius:25px;
+  background:linear-gradient(145deg,rgba(24,33,64,.91),rgba(13,20,42,.88));
+  border:1px solid rgba(173,192,255,.17);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.045);
+  backdrop-filter:blur(18px);
+}
+.panel::before{
+  content:"";position:absolute;left:18px;right:18px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(102,226,255,.45),rgba(168,121,255,.45),transparent);
+  pointer-events:none;
+}
+h2{margin:0 0 15px;font-size:22px;font-weight:850;letter-spacing:-.3px}
+.muted{color:var(--muted)}
+.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mode{
+  position:relative;text-align:right;padding:18px 16px;
+  background:linear-gradient(145deg,rgba(39,52,91,.76),rgba(24,32,60,.84));
+  border:1px solid rgba(174,193,255,.14);border-radius:17px;
+  display:flex;flex-direction:column;gap:6px;min-width:0;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.mode::after{
+  content:"";position:absolute;top:-40px;left:-30px;width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(67,230,245,.12),transparent 70%);pointer-events:none;
+}
+.mode .emoji{
+  display:grid;place-items:center;width:49px;height:49px;margin-bottom:4px;border-radius:15px;
+  font-size:27px;background:linear-gradient(145deg,rgba(109,140,255,.2),rgba(168,121,255,.12));
+  border:1px solid rgba(178,194,255,.15);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.mode strong{font-size:16px}
+.mode small{color:var(--muted);font-weight:400;line-height:1.65}
+.mode.active{
+  border:1px solid rgba(80,240,176,.85);padding:18px 16px;
+  background:linear-gradient(145deg,rgba(21,91,86,.65),rgba(22,40,67,.94));
+  box-shadow:0 0 0 1px rgba(80,240,176,.1),0 10px 30px rgba(21,201,164,.08),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.mode.active::before{
+  content:"✓";position:absolute;top:10px;left:11px;display:grid;place-items:center;
+  width:23px;height:23px;border-radius:50%;background:var(--green);color:#06241d;font-size:13px;font-weight:900;
+}
+.mode.active .emoji{background:linear-gradient(145deg,rgba(80,240,176,.24),rgba(67,230,245,.12));border-color:rgba(80,240,176,.25)}
+.settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:22px 0}
+.field{min-width:0}
+.field label{display:block;color:#b6c3e0;font-size:13px;margin-bottom:6px;font-weight:650}
+input,select{
+  width:100%;min-width:0;padding:12px 13px;border-radius:12px;
+  border:1px solid rgba(173,192,255,.18);background:rgba(7,13,29,.72);color:var(--text);
+  box-shadow:inset 0 2px 7px rgba(0,0,0,.12);transition:border-color .18s,box-shadow .18s;
+}
+input:hover,select:hover{border-color:rgba(130,207,255,.35)}
+input:focus,select:focus{border-color:rgba(67,230,245,.65);box-shadow:0 0 0 3px rgba(67,230,245,.08);outline:none}
+input::placeholder{color:#697a9f}
+.names-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field.full{grid-column:1/-1}
+.start-row{text-align:center;margin-top:3px}
+.start-row button{min-width:190px;padding:12px 24px;font-size:16px}
+.note{font-size:12px;color:#7f91b9;text-align:center;margin:14px 0 0}
+.game-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}
+.game-head h2{margin:0;font-size:20px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{padding:8px 12px;font-size:13px}
+.hud{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px}
+.hud-box{position:relative;display:flex;align-items:center;gap:7px;min-width:0;background:linear-gradient(145deg,rgba(28,40,75,.85),rgba(13,22,44,.86));border:1px solid rgba(173,192,255,.12);border-radius:99px;padding:6px 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.hud-label{font-size:11px;color:#9fafd2;letter-spacing:.2px}
+.hud-value{font-size:14px;font-weight:800;line-height:1.3;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}
+.progress-info{display:flex;justify-content:space-between;color:#9fafd2;font-size:12px;margin-bottom:6px}
+.progress{height:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.035);border-radius:30px;overflow:hidden;margin-bottom:14px}
+.progress-bar{
+  height:100%;width:0;border-radius:30px;
+  background:linear-gradient(90deg,var(--blue),var(--cyan),var(--green));
+  box-shadow:0 0 15px rgba(67,230,245,.3);transition:width .25s ease;
+}
+.players{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-bottom:13px}
+.player{
+  position:relative;flex:1;min-width:100px;text-align:center;
+  background:linear-gradient(145deg,rgba(27,38,70,.9),rgba(14,22,44,.9));
+  border:1px solid rgba(173,192,255,.14);border-radius:14px;padding:9px 12px;color:#aab8d8;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.player.current{
+  border-color:rgba(80,240,176,.8);
+  background:linear-gradient(145deg,rgba(18,94,75,.64),rgba(17,44,58,.95));
+  color:#fff;box-shadow:0 0 0 1px rgba(80,240,176,.08),0 0 23px rgba(80,240,176,.08);
+}
+
+.player b{display:block;font-size:14px}.player small{font-size:12px;color:inherit;opacity:.82}
+.status{
+  position:relative;text-align:center;padding:10px 14px;min-height:46px;margin:9px 0 15px;
+  border:1px solid rgba(109,140,255,.16);border-radius:13px;
+  background:linear-gradient(90deg,rgba(109,140,255,.07),rgba(67,230,245,.045),rgba(168,121,255,.07));
+  color:#dce7ff;box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.board{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(6px,1.1vw,11px);width:min(900px,100%);margin:auto;
+}
+.card{
+  aspect-ratio:1/1;min-width:0;perspective:900px;cursor:pointer;touch-action:manipulation;
+  filter:drop-shadow(0 5px 5px rgba(0,0,0,.14));
+  transition:filter .2s ease,transform .2s ease;
+}
+.card:not(.matched):hover{filter:drop-shadow(0 8px 10px rgba(0,0,0,.28));transform:translateY(-2px)}
+.card-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.2,.75,.25,1)}
+.card.flipped .card-inner,.card.matched .card-inner{transform:rotateY(180deg)}
+.face{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  border-radius:clamp(8px,1.3vw,15px);backface-visibility:hidden;
+  user-select:none;-webkit-user-select:none;overflow:hidden;
+}
+.back{
+  background:
+    radial-gradient(circle at 50% 42%,rgba(67,230,245,.22),transparent 35%),
+    linear-gradient(145deg,#283e78 0%,#493b87 48%,#252e60 100%);
+  border:1px solid rgba(183,206,255,.38);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -8px 18px rgba(5,9,29,.24),0 5px 13px rgba(0,0,0,.18);
+}
+.back::before{
+  content:"";position:absolute;inset:7%;border:1px solid rgba(186,217,255,.22);border-radius:inherit;
+  background:repeating-linear-gradient(135deg,transparent 0 9px,rgba(255,255,255,.025) 9px 10px);
+}
+.back::after{
+  content:"✦";position:relative;width:50%;height:50%;border:1px solid rgba(174,237,255,.72);
+  border-radius:13px;display:grid;place-items:center;color:#e7fbff;
+  font-size:clamp(12px,2.6vw,25px);text-shadow:0 0 13px rgba(67,230,245,.8);
+  background:linear-gradient(145deg,rgba(67,230,245,.13),rgba(168,121,255,.12));
+  box-shadow:0 0 18px rgba(67,230,245,.1),inset 0 1px 0 rgba(255,255,255,.15);
+}
+.front{
+  transform:rotateY(180deg);
+  background:linear-gradient(145deg,#f9fbff,#dce7ff);
+  color:#0d1730;border:1px solid rgba(255,255,255,.95);
+  font-size:clamp(20px,10vw,60px);
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(109,140,255,.12);
+}
+.card.flipped .front{box-shadow:inset 0 1px 0 #fff,0 0 22px rgba(67,230,245,.12)}
+.card.matched{cursor:default;filter:drop-shadow(0 0 8px rgba(80,240,176,.18))}
+.card.matched .front{
+  background:linear-gradient(145deg,#d9fff0,#a4f5d4);border-color:#62f0b7;
+  box-shadow:inset 0 1px 0 #fff,0 0 0 2px rgba(80,240,176,.14),0 0 20px rgba(80,240,176,.13);
+}
+.card.shuffling{animation:shuffle .4s ease}
+@keyframes shuffle{35%{transform:translateY(-5px) rotate(3deg)}70%{transform:translateY(3px) rotate(-3deg)}}
+.controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}
+.message{text-align:center;color:#9eafd3;margin-top:11px;min-height:22px;font-size:13px}
+.overlay{
+  position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;
+  padding:15px;background:rgba(3,6,18,.78);backdrop-filter:blur(13px) saturate(130%);
+}
+.overlay.show{display:flex}
+.modal{
+  position:relative;width:min(460px,100%);max-height:90dvh;overflow:auto;text-align:center;
+  background:
+    radial-gradient(ellipse at top,rgba(109,140,255,.14),transparent 55%),
+    linear-gradient(145deg,#1a2445,#10172e);
+  border:1px solid rgba(173,192,255,.22);border-radius:25px;padding:28px;
+  box-shadow:0 30px 100px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.modal::before{
+  content:"";position:absolute;top:0;left:18%;right:18%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);
+}
+.modal-icon{font-size:48px;filter:drop-shadow(0 4px 15px rgba(109,140,255,.25))}
+.modal h2{margin:6px 0 8px}
+.modal p{color:#b3c0df;line-height:1.9}
+.modal-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:18px}
+.stars{font-size:29px;letter-spacing:3px;color:var(--gold);text-shadow:0 0 17px rgba(255,209,102,.2)}
+.score-list{display:grid;gap:8px;margin:16px 0}
+.score-row{
+  display:flex;justify-content:space-between;gap:12px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(173,192,255,.1);
+  border-radius:11px;padding:9px 13px;
+}
+.score-row b{color:var(--green)}
+@media(max-width:650px){
+  .app{padding:12px}
+  header{margin:3px 0 17px}
+  h1{font-size:clamp(29px,7vw,38px)}
+  .subtitle{font-size:12px;margin-top:7px}
+  .panel{padding:15px;border-radius:20px}
+  .mode-grid{grid-template-columns:1fr;gap:8px}
+  .mode{display:grid;grid-template-columns:43px 1fr;column-gap:11px;align-items:center;padding:12px 13px}
+  .mode .emoji{grid-row:span 2;width:42px;height:42px;margin:0;font-size:23px;border-radius:12px}
+  .mode strong{align-self:end;font-size:15px}
+  .mode small{align-self:start;font-size:12px}
+  .mode.active{padding:12px 13px}
+  .mode.active::before{top:8px;left:8px;width:19px;height:19px;font-size:11px}
+  .settings{grid-template-columns:1fr;gap:11px;margin:16px 0}
+  .field.full{grid-column:auto}
+  .start-row button{width:100%;min-width:0}
+  .game-head{align-items:flex-start;gap:8px;display:block;}
+  .game-head h2{font-size:17px}
+  .actions{justify-content:flex-start;gap:6px}
+  .actions button{font-size:12px;padding:7px 9px;border-radius:10px}
+  .hud{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:10px}
+  .hud-box{padding:7px 10px;border-radius:12px}
+  .hud-label{font-size:10px}
+  .hud-value{font-size:clamp(16px,4vw,20px)}
+  .progress{margin-bottom:10px}
+  .players{gap:6px;margin-bottom:9px}
+  .player{min-width:calc(50% - 6px);padding:7px 8px}
+  .player.current::before{font-size:9px}
+  .status{padding:8px 10px;min-height:40px;margin:7px 0 11px;font-size:13px}
+  .board{gap:5px}
+  .front{font-size:clamp(20px,10vw,60px)}
+  .controls{margin-top:12px}
+  .modal{padding:23px 18px;border-radius:21px}
+}
+@media(max-width:370px){
+  .app{padding:8px}
+  .panel{padding:11px}
+  .board{gap:4px}
+  .back::before{inset:5%}
+  .back::after{border-radius:9px;border-width:1px}
+  .game-head{flex-direction:column}
+  .actions{width:100%}
+}
+@media(orientation:landscape) and (max-height:520px){
+  .app{padding:7px 12px}
+  header{margin:0 0 7px}
+  h1{font-size:25px}
+  h1::after{margin-top:5px;height:3px}
+  .subtitle{font-size:11px;margin-top:4px}
+  .game-head{margin-bottom:6px;align-items:center}
+  .hud{margin-bottom:5px}
+  .hud-box{padding:4px 8px}
+  .progress{margin-bottom:6px}
+  .players{margin-bottom:5px}
+  .status{min-height:30px;margin:4px 0 7px;padding:4px}
+  .board{gap:4px}
+  .controls{margin-top:7px}
+  .panel{padding:10px 14px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+
+/* Theme selection: visual-only; game rules and state remain unchanged. */
+.theme-picker{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 22px;padding:12px 15px;width:min(440px,100%);border:1px solid var(--line);border-radius:15px;background:var(--panel);}
+.theme-picker label{font-weight:800;color:var(--text);white-space:nowrap}
+.theme-select{min-width:112px;width:auto;padding:8px 12px;border-radius:10px;cursor:pointer;background:var(--panel-solid);color:var(--text);border-color:var(--line)}
+.theme-inline{display:flex;align-items:center;gap:5px;color:var(--text);font-size:12px;font-weight:800}
+.theme-inline .theme-select{min-width:90px;max-width:112px;padding:6px 8px;font-size:12px}
+/* CLASSIC — parchment, ink and traditional card backs */
+body[data-theme="classic"]{color-scheme:light;--bg:#efe3c8;--bg-2:#e6d4b0;--panel:#f8efd9;--panel-solid:#f8efd9;--panel-2:#e8d6b5;--panel-3:#d8c19a;--text:#38281d;--muted:#80674f;--blue:#315b8b;--cyan:#5d9b91;--purple:#866044;--pink:#b95c50;--green:#397a55;--red:#ad423b;--gold:#a16a1e;--line:rgba(91,61,34,.22);--shadow:0 18px 45px rgba(91,61,34,.16);background:#efe3c8}
+body[data-theme="classic"]::before{opacity:.3;background-image:repeating-linear-gradient(0deg,rgba(106,75,43,.045) 0 1px,transparent 1px 5px),repeating-linear-gradient(90deg,rgba(106,75,43,.025) 0 1px,transparent 1px 7px);mask-image:none}
+body[data-theme="classic"]::after{opacity:.25;background:radial-gradient(circle at 12% 20%,#a16a1e 0 1px,transparent 2px),radial-gradient(circle at 88% 70%,#397a55 0 1px,transparent 2px)}
+body[data-theme="classic"] h1{color:#4a3020;text-shadow:none}body[data-theme="classic"] h1::after{background:linear-gradient(90deg,#397a55,#a16a1e,#ad423b);box-shadow:none}
+body[data-theme="classic"] .panel{background:linear-gradient(145deg,#fbf3df,#f0e2c5);border-color:#c8b18a;backdrop-filter:none;box-shadow:var(--shadow),inset 0 1px #fff8e8}
+body[data-theme="classic"] .panel::before{background:linear-gradient(90deg,transparent,#b58b4e,transparent)}
+body[data-theme="classic"] button{color:#fdf4df;background:linear-gradient(145deg,#765039,#503323);border-color:#a9865d;box-shadow:0 4px 10px #63432820,inset 0 1px #ffffff30}
+body[data-theme="classic"] .primary{color:#fff8e8;background:linear-gradient(120deg,#47785a,#2f5c42)}body[data-theme="classic"] .success{color:#fff;background:linear-gradient(120deg,#568e5f,#347247)}body[data-theme="classic"] .purple{color:#fff;background:linear-gradient(120deg,#9d7049,#765037)}
+body[data-theme="classic"] input,body[data-theme="classic"] select{background:#fff8e9;color:#38281d;border-color:#cdb995;box-shadow:inset 0 1px 3px #76503912}
+body[data-theme="classic"] .mode{background:linear-gradient(145deg,#f5e7ca,#ead7b4);border-color:#d3bd96;box-shadow:inset 0 1px #fff9e9}
+body[data-theme="classic"] .mode .emoji{background:#e5d0a9;border-color:#cfb68b;box-shadow:none}body[data-theme="classic"] .mode.active{background:linear-gradient(145deg,#dce9d2,#c6d9bc);border-color:#56845b;box-shadow:0 5px 16px #397a551c}body[data-theme="classic"] .mode.active::before{background:#397a55;color:white}
+body[data-theme="classic"] .hud-box{background:linear-gradient(145deg,#fff6e2,#ead9b8);border-color:#d3bd96;box-shadow:inset 0 1px #fff}body[data-theme="classic"] .hud-label,body[data-theme="classic"] .progress-info{color:#80674f}body[data-theme="classic"] .hud-box::after{background:radial-gradient(circle,#b58b4e22,transparent 70%)}
+body[data-theme="classic"] .progress{background:#dfcba6;border-color:#d2bb90}body[data-theme="classic"] .progress-bar{background:linear-gradient(90deg,#315b8b,#397a55,#a16a1e);box-shadow:none}
+body[data-theme="classic"] .player{background:linear-gradient(145deg,#f3e4c6,#e5d1ac);border-color:#d3bd96;color:#72563c}body[data-theme="classic"] .player.current{background:linear-gradient(145deg,#d9e8cd,#c1d7b4);border-color:#56845b;color:#29472d;box-shadow:0 0 0 1px #397a5512}body[data-theme="classic"] .player.current::before{color:#397a55}
+body[data-theme="classic"] .status{background:linear-gradient(90deg,#e6d7b7,#f6ecd5,#e6d7b7);border-color:#d3bd96;color:#503a28;box-shadow:none}
+body[data-theme="classic"] .back{background:repeating-linear-gradient(45deg,#6c382f 0 5px,#783f35 5px 10px);border:2px solid #d5b66f;box-shadow:inset 0 0 0 3px #6c382f, inset 0 0 0 4px #d5b66f,0 4px 8px #49301f22}
+body[data-theme="classic"] .back::before{border:1px solid #d5b66f;border-radius:7px;background:repeating-linear-gradient(135deg,transparent 0 7px,#d5b66f18 7px 8px)}body[data-theme="classic"] .back::after{content:"✥";border:1px solid #d5b66f;border-radius:50%;color:#f4d991;text-shadow:none;background:#6c382f;box-shadow:none}
+body[data-theme="classic"] .front{background:linear-gradient(145deg,#fff9e9,#ead7b4);color:#38281d;border-color:#d3bd96;box-shadow:inset 0 1px #fff}body[data-theme="classic"] .card.matched .front{background:linear-gradient(145deg,#dce9d2,#bfd7b4);border-color:#7aa477;box-shadow:none}body[data-theme="classic"] body[data-theme="classic"] .modal{background:linear-gradient(145deg,#fbf0d8,#e9d5b1);border-color:#c8ad7d;box-shadow:0 25px 70px #49301f35}body[data-theme="classic"] .modal::before{background:linear-gradient(90deg,transparent,#a16a1e,transparent)}body[data-theme="classic"] .modal p{color:#80674f}body[data-theme="classic"] .score-row{background:#fff8e7;border-color:#d3bd96}body[data-theme="classic"] .score-row b{color:#397a55}
+/* MINIMAL — crisp grayscale, restrained borders and almost no glow */
+body[data-theme="minimal"]{color-scheme:light;--bg:#f2f3f5;--bg-2:#e8eaed;--panel:#fff;--panel-solid:#fff;--panel-2:#f1f2f4;--panel-3:#e5e7eb;--text:#20242a;--muted:#737983;--blue:#4f5968;--cyan:#737f8d;--purple:#626b78;--pink:#858b94;--green:#3e745b;--red:#a94d4d;--gold:#76602f;--line:rgba(31,41,55,.13);--shadow:0 12px 35px rgba(31,41,55,.08);background:#f2f3f5}
+body[data-theme="minimal"]::before{opacity:.12;background-image:linear-gradient(#626b780c 1px,transparent 1px),linear-gradient(90deg,#626b780c 1px,transparent 1px);background-size:28px 28px}body[data-theme="minimal"]::after{display:none}
+body[data-theme="minimal"] h1{color:#20242a;text-shadow:none}body[data-theme="minimal"] h1::after{background:#626b78;box-shadow:none;height:3px}
+body[data-theme="minimal"] .panel{background:#fff;border-color:#e1e4e8;box-shadow:0 12px 35px #1f29370a;backdrop-filter:none}body[data-theme="minimal"] .panel::before{display:none}
+body[data-theme="minimal"] button{color:#303640;background:#f5f6f7;border-color:#dfe2e6;box-shadow:none}body[data-theme="minimal"] button:hover:not(:disabled){box-shadow:0 4px 12px #1f293710;border-color:#9ca3af}body[data-theme="minimal"] .primary{color:#fff;background:#303640;border-color:#303640;box-shadow:none}body[data-theme="minimal"] .success{color:#fff;background:#3e745b}body[data-theme="minimal"] .purple{color:#fff;background:#626b78}
+body[data-theme="minimal"] input,body[data-theme="minimal"] select{background:#fff;color:#20242a;border-color:#d9dde2;box-shadow:none}
+body[data-theme="minimal"] .mode{background:#fafafa;border-color:#e1e4e8;box-shadow:none}body[data-theme="minimal"] .mode .emoji{background:#f0f1f3;border-color:#e1e4e8;box-shadow:none}body[data-theme="minimal"] .mode.active{background:#f0f3f1;border-color:#6c9b82;box-shadow:0 0 0 1px #6c9b821c}body[data-theme="minimal"] .mode.active::before{background:#3e745b;color:#fff}
+body[data-theme="minimal"] .hud-box{background:#f8f9fa;border-color:#e4e6e9;border-radius:10px;box-shadow:none}body[data-theme="minimal"] .hud-label,body[data-theme="minimal"] .progress-info{color:#737983}body[data-theme="minimal"] .hud-box::after{display:none}body[data-theme="minimal"] .progress{background:#e5e7eb;border:0}body[data-theme="minimal"] .progress-bar{background:#626b78;box-shadow:none}
+body[data-theme="minimal"] .player{background:#f8f9fa;border-color:#e1e4e8;color:#737983;border-radius:10px}body[data-theme="minimal"] .player.current{background:#edf4ef;border-color:#6c9b82;color:#20242a;box-shadow:none}body[data-theme="minimal"] .player.current::before{color:#3e745b}
+body[data-theme="minimal"] .status{background:#f7f8f9;border-color:#e1e4e8;color:#444b55;box-shadow:none;border-radius:10px}body[data-theme="minimal"] .back{background:linear-gradient(145deg,#525a65,#303640);border:1px solid #777f89;box-shadow:inset 0 0 0 4px #ffffff0a,0 3px 7px #00000010}body[data-theme="minimal"] .back::before{border-color:#ffffff30;background:none;border-radius:5px}body[data-theme="minimal"] .back::after{content:"●";color:#fff;border:1px solid #ffffff66;border-radius:50%;background:#ffffff0b;box-shadow:none;text-shadow:none}
+body[data-theme="minimal"] .front{background:#fff;color:#20242a;border-color:#dfe2e6;box-shadow:none}body[data-theme="minimal"] .card.matched .front{background:#e9f2ec;border-color:#8ab19a;box-shadow:none}body[data-theme="minimal"] body[data-theme="minimal"] .modal{background:#fff;border-color:#e1e4e8;box-shadow:0 25px 70px #1f293720}body[data-theme="minimal"] .modal::before{background:#626b78}body[data-theme="minimal"] .modal p{color:#737983}body[data-theme="minimal"] .score-row{background:#f8f9fa;border-color:#e1e4e8}body[data-theme="minimal"] .score-row b{color:#3e745b}
+/* ANIME — dreamy pastel palette with playful stars and candy-like cards */
+body[data-theme="anime"]{color-scheme:light;--bg:#fff0f7;--bg-2:#ffe1f0;--panel:rgba(255,250,255,.92);--panel-solid:#fff7fc;--panel-2:#ffe8f5;--panel-3:#f8d8ec;--text:#512c55;--muted:#9a709b;--blue:#8f80e8;--cyan:#76cfe0;--purple:#bb83dc;--pink:#f08dbd;--green:#62bfa4;--red:#e77f9a;--gold:#d79a4a;--line:rgba(165,105,177,.22);--shadow:0 20px 55px rgba(164,94,166,.16);background:#fff0f7}
+body[data-theme="anime"]::before{opacity:.4;background-image:radial-gradient(circle,#e99acb66 1.2px,transparent 2px),radial-gradient(circle,#a8a0f566 1px,transparent 2px);background-size:37px 37px,53px 53px;mask-image:none}body[data-theme="anime"]::after{opacity:.5;background:radial-gradient(circle at 10% 16%,#f6b3d9 0 3px,transparent 4px),radial-gradient(circle at 88% 28%,#b6a6f2 0 4px,transparent 5px),radial-gradient(circle at 79% 84%,#f6b3d9 0 2px,transparent 3px)}
+body[data-theme="anime"] h1{color:#8e5798;text-shadow:0 2px #fff}body[data-theme="anime"] h1::after{background:linear-gradient(90deg,#f08dbd,#a99af3,#76cfe0);box-shadow:0 0 15px #e9a9d544}
+body[data-theme="anime"] .panel{background:linear-gradient(145deg,#fffaffed,#fff0f8ed);border-color:#e9c6e9;box-shadow:var(--shadow),inset 0 1px #fff;backdrop-filter:blur(10px)}body[data-theme="anime"] .panel::before{background:linear-gradient(90deg,transparent,#f08dbd,#a99af3,transparent)}
+body[data-theme="anime"] button{color:#653b70;background:linear-gradient(145deg,#fffaff,#f6e5fb);border-color:#e4c8ed;box-shadow:0 5px 12px #b77fc51c,inset 0 1px #fff}body[data-theme="anime"] .primary{color:#fff;background:linear-gradient(115deg,#ee8fbd,#a18ce9)}body[data-theme="anime"] .success{color:#fff;background:linear-gradient(120deg,#71cbb0,#4cae9d)}body[data-theme="anime"] .purple{color:#fff;background:linear-gradient(120deg,#b68ce9,#e78fc5)}
+body[data-theme="anime"] input,body[data-theme="anime"] select{background:#fffaff;color:#512c55;border-color:#e5c9e9;box-shadow:inset 0 1px 3px #b77fc510}
+body[data-theme="anime"] .mode{background:linear-gradient(145deg,#fffaff,#fbe9f7);border-color:#ebd1ec;box-shadow:inset 0 1px #fff}body[data-theme="anime"] .mode .emoji{background:linear-gradient(145deg,#ffe0ef,#e7e0ff);border-color:#ebc9eb;box-shadow:none}body[data-theme="anime"] .mode.active{background:linear-gradient(145deg,#ffe1f0,#e9e2ff);border-color:#d59bd5;box-shadow:0 6px 20px #d89bce22}body[data-theme="anime"] .mode.active::before{background:#e98bbd;color:white}
+body[data-theme="anime"] .hud-box{background:linear-gradient(145deg,#fffaff,#fbe8f5);border-color:#ebcce7;box-shadow:inset 0 1px #fff}body[data-theme="anime"] .hud-label,body[data-theme="anime"] .progress-info{color:#9a709b}body[data-theme="anime"] .hud-box::after{background:radial-gradient(circle,#f08dbd28,transparent 70%)}body[data-theme="anime"] .progress{background:#f1d9ed;border-color:#ebcce7}body[data-theme="anime"] .progress-bar{background:linear-gradient(90deg,#a18ce9,#f08dbd,#76cfe0);box-shadow:0 0 12px #f08dbd44}
+body[data-theme="anime"] .player{background:linear-gradient(145deg,#fffaff,#f9e8f6);border-color:#ebcce7;color:#9a709b}body[data-theme="anime"] .player.current{background:linear-gradient(145deg,#e0f8ef,#d9f1ff);border-color:#83cbb8;color:#512c55;box-shadow:0 0 18px #83cbb822}body[data-theme="anime"] .player.current::before{color:#4cae9d}
+body[data-theme="anime"] .status{background:linear-gradient(90deg,#ffe7f3,#f1eaff,#e5f9ff);border-color:#ebcce7;color:#754879;box-shadow:none}
+body[data-theme="anime"] .back{background:radial-gradient(circle at 50% 40%,#fff6ff 0 4%,transparent 5%),linear-gradient(145deg,#a99af3,#e98fc5);border:2px solid #fff5ff;box-shadow:inset 0 0 0 3px #ffffff40,0 5px 13px #b77fc52b}body[data-theme="anime"] .back::before{border:1px dashed #ffffff9c;border-radius:14px;background:radial-gradient(circle,#ffffff55 1px,transparent 2px);background-size:12px 12px}body[data-theme="anime"] .back::after{content:"♡";color:#fff;font-size:clamp(22px,3vw,34px);border:0;background:none;text-shadow:0 2px 8px #8e579866;box-shadow:none}
+body[data-theme="anime"] .front{background:linear-gradient(145deg,#fffaff,#ffe7f4);color:#653b70;border-color:#fff;box-shadow:inset 0 1px #fff,0 0 0 1px #e5bce5}body[data-theme="anime"] .card.matched .front{background:linear-gradient(145deg,#e0f8ef,#d8f1ff);border-color:#83cbb8;box-shadow:0 0 14px #83cbb833}body[data-theme="anime"] body[data-theme="anime"] .modal{background:linear-gradient(145deg,#fffaff,#ffeaf6);border-color:#e9c6e9;box-shadow:0 25px 70px #a75d9b33}body[data-theme="anime"] .modal::before{background:linear-gradient(90deg,transparent,#f08dbd,#a99af3,transparent)}body[data-theme="anime"] .modal p{color:#9a709b}body[data-theme="anime"] .score-row{background:#fff8fd;border-color:#ebcce7}body[data-theme="anime"] .score-row b{color:#4cae9d}
+/* NEON — dark arcade cabinet, luminous cyan and electric violet */
+body[data-theme="neon"]{color-scheme:dark;--bg:#070714;--bg-2:#101026;--panel:rgba(13,13,36,.9);--panel-solid:#101026;--panel-2:#171735;--panel-3:#222249;--text:#f2f5ff;--muted:#9aa4d0;--blue:#806bff;--cyan:#00f5ff;--purple:#c34dff;--pink:#ff3eb5;--green:#48ffb0;--red:#ff456d;--gold:#ffdf5d;--line:rgba(0,245,255,.25);--shadow:0 0 38px #7b3cff18,0 18px 60px #0008;background:#070714}
+body[data-theme="neon"]::before{opacity:.45;background-image:linear-gradient(#00f5ff10 1px,transparent 1px),linear-gradient(90deg,#00f5ff10 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 90%)}body[data-theme="neon"]::after{background:radial-gradient(circle at 12% 20%,#00f5ff 0 1px,transparent 2px),radial-gradient(circle at 84% 15%,#ff3eb5 0 1px,transparent 2px),radial-gradient(circle at 78% 82%,#c34dff 0 2px,transparent 3px)}
+body[data-theme="neon"] h1{color:#f7fbff;text-shadow:0 0 12px #00f5ff77,0 0 28px #c34dff44}body[data-theme="neon"] h1::after{background:linear-gradient(90deg,#00f5ff,#806bff,#ff3eb5);box-shadow:0 0 18px #00f5ff66}
+body[data-theme="neon"] .panel{background:linear-gradient(145deg,#11112ddd,#09091eeb);border-color:#00f5ff35;box-shadow:var(--shadow),inset 0 1px #00f5ff0a;backdrop-filter:blur(14px)}body[data-theme="neon"] .panel::before{background:linear-gradient(90deg,transparent,#00f5ff,#c34dff,transparent)}
+body[data-theme="neon"] button{color:#f2f5ff;background:linear-gradient(145deg,#24234e,#14142e);border-color:#6b63bd66;box-shadow:0 0 12px #806bff12,inset 0 1px #ffffff0c}body[data-theme="neon"] button:hover:not(:disabled){border-color:#00f5ff;box-shadow:0 0 17px #00f5ff26}body[data-theme="neon"] .primary{color:#050817;background:linear-gradient(115deg,#00f5ff,#806bff);box-shadow:0 0 22px #00f5ff26}body[data-theme="neon"] .success{color:#06170f;background:linear-gradient(120deg,#48ffb0,#00dba6)}body[data-theme="neon"] .purple{color:#fff;background:linear-gradient(120deg,#806bff,#c34dff)}
+body[data-theme="neon"] input,body[data-theme="neon"] select{background:#09091e;color:#f2f5ff;border-color:#00f5ff35;box-shadow:inset 0 0 12px #00f5ff08}
+body[data-theme="neon"] .mode{background:linear-gradient(145deg,#19193b,#0d0d24);border-color:#6b63bd44;box-shadow:inset 0 1px #ffffff08}body[data-theme="neon"] .mode .emoji{background:#25204b;border-color:#806bff66;box-shadow:0 0 14px #806bff16}body[data-theme="neon"] .mode.active{background:linear-gradient(145deg,#123e49,#19193b);border-color:#00f5ff;box-shadow:0 0 0 1px #00f5ff20,0 0 24px #00f5ff12}body[data-theme="neon"] .mode.active::before{background:#00f5ff;color:#07111f}
+body[data-theme="neon"] .hud-box{background:linear-gradient(145deg,#19193b,#0d0d24);border-color:#00f5ff30;box-shadow:inset 0 1px #ffffff08,0 0 15px #00f5ff08}body[data-theme="neon"] .hud-label,body[data-theme="neon"] .progress-info{color:#9aa4d0}body[data-theme="neon"] .hud-box::after{background:radial-gradient(circle,#00f5ff20,transparent 70%)}body[data-theme="neon"] .progress{background:#191933;border-color:#00f5ff20}body[data-theme="neon"] .progress-bar{background:linear-gradient(90deg,#806bff,#00f5ff,#48ffb0);box-shadow:0 0 15px #00f5ff55}
+body[data-theme="neon"] .player{background:linear-gradient(145deg,#19193b,#0d0d24);border-color:#806bff55;color:#9aa4d0}body[data-theme="neon"] .player.current{background:linear-gradient(145deg,#103a42,#101e34);border-color:#48ffb0;color:#fff;box-shadow:0 0 20px #48ffb018}body[data-theme="neon"] .player.current::before{color:#48ffb0}
+body[data-theme="neon"] .status{background:linear-gradient(90deg,#806bff12,#00f5ff0c,#c34dff12);border-color:#00f5ff35;color:#e3faff;box-shadow:inset 0 0 15px #00f5ff08}
+body[data-theme="neon"] .back{background:radial-gradient(circle at 50% 45%,#00f5ff20,transparent 45%),linear-gradient(145deg,#26205d,#101b42);border:1px solid #00f5ffbb;box-shadow:inset 0 0 0 2px #806bff44,0 0 13px #00f5ff20}body[data-theme="neon"] .back::before{border-color:#c34dff88;background:repeating-linear-gradient(135deg,transparent 0 8px,#00f5ff12 8px 9px)}body[data-theme="neon"] .back::after{content:"⌘";color:#00f5ff;border-color:#c34dff;background:#806bff12;text-shadow:0 0 13px #00f5ff;box-shadow:0 0 15px #00f5ff20}
+body[data-theme="neon"] .front{background:linear-gradient(145deg,#efffff,#c7e8ff);color:#10132b;border-color:#00f5ff;box-shadow:0 0 0 1px #00f5ff33,0 0 15px #00f5ff16}body[data-theme="neon"] .card.matched .front{background:linear-gradient(145deg,#c9ffe9,#6dfac2);border-color:#48ffb0;box-shadow:0 0 19px #48ffb044}body[data-theme="neon"] body[data-theme="neon"] .modal{background:linear-gradient(145deg,#19193b,#09091e);border-color:#00f5ff55;box-shadow:0 0 45px #806bff20,0 25px 70px #0009}body[data-theme="neon"] .modal::before{background:linear-gradient(90deg,transparent,#00f5ff,#c34dff,transparent)}body[data-theme="neon"] .modal p{color:#9aa4d0}body[data-theme="neon"] .score-row{background:#ffffff08;border-color:#00f5ff20}body[data-theme="neon"] .score-row b{color:#48ffb0}
+/* NATURE — forest greens, soft sage and botanical details */
+body[data-theme="nature"]{color-scheme:light;--bg:#e5eee0;--bg-2:#d6e4cf;--panel:rgba(247,250,239,.94);--panel-solid:#f7faef;--panel-2:#e6eedc;--panel-3:#d4e2c8;--text:#243b2d;--muted:#6e8873;--blue:#527e65;--cyan:#8abf91;--purple:#6f8e62;--pink:#b6a36b;--green:#3f8058;--red:#b75e4e;--gold:#a87931;--line:rgba(60,100,68,.2);--shadow:0 20px 55px rgba(49,91,54,.14);background:#e5eee0}
+body[data-theme="nature"]::before{opacity:.32;background-image:radial-gradient(ellipse at 20% 20%,#85ae7c30 0 2px,transparent 3px),radial-gradient(ellipse at 80% 60%,#a4bc7c33 0 3px,transparent 4px);background-size:61px 59px,83px 77px;mask-image:none}body[data-theme="nature"]::after{opacity:.3;background:radial-gradient(ellipse at 6% 20%,#8abf91 0 2px,transparent 3px),radial-gradient(ellipse at 92% 75%,#b6a36b 0 2px,transparent 3px)}
+body[data-theme="nature"] h1{color:#2f6242;text-shadow:0 1px #fff}body[data-theme="nature"] h1::after{background:linear-gradient(90deg,#3f8058,#a87931,#8abf91);box-shadow:0 0 12px #3f805822}
+body[data-theme="nature"] .panel{background:linear-gradient(145deg,#f8fbf1ed,#eaf2e2ed);border-color:#c6d8bd;box-shadow:var(--shadow),inset 0 1px #fff;backdrop-filter:blur(10px)}body[data-theme="nature"] .panel::before{background:linear-gradient(90deg,transparent,#8abf91,#a87931,transparent)}
+body[data-theme="nature"] button{color:#f7faef;background:linear-gradient(145deg,#527e65,#355b43);border-color:#739b77;box-shadow:0 4px 11px #355b431c,inset 0 1px #ffffff24}body[data-theme="nature"] .primary{color:#fff;background:linear-gradient(115deg,#6eaa78,#3f8058)}body[data-theme="nature"] .success{color:#fff;background:linear-gradient(120deg,#5a9667,#34734d)}body[data-theme="nature"] .purple{color:#fff;background:linear-gradient(120deg,#8f9c60,#6f8e62)}
+body[data-theme="nature"] input,body[data-theme="nature"] select{background:#f9fbf4;color:#243b2d;border-color:#c6d8bd;box-shadow:inset 0 1px 3px #355b430c}
+body[data-theme="nature"] .mode{background:linear-gradient(145deg,#f8fbf1,#e7efdf);border-color:#cbdcc2;box-shadow:inset 0 1px #fff}body[data-theme="nature"] .mode .emoji{background:linear-gradient(145deg,#d9e8ce,#e9e6c9);border-color:#c4d8b8;box-shadow:none}body[data-theme="nature"] .mode.active{background:linear-gradient(145deg,#d9ebd2,#c4dfc0);border-color:#6eaa78;box-shadow:0 5px 18px #3f80581c}body[data-theme="nature"] .mode.active::before{background:#3f8058;color:white}
+body[data-theme="nature"] .hud-box{background:linear-gradient(145deg,#f9fbf3,#e4eddc);border-color:#cbdcc2;box-shadow:inset 0 1px #fff}body[data-theme="nature"] .hud-label,body[data-theme="nature"] .progress-info{color:#6e8873}body[data-theme="nature"] .hud-box::after{background:radial-gradient(circle,#8abf912e,transparent 70%)}body[data-theme="nature"] .progress{background:#d6e4cf;border-color:#c6d8bd}body[data-theme="nature"] .progress-bar{background:linear-gradient(90deg,#527e65,#8abf91,#a87931);box-shadow:0 0 12px #8abf9140}
+body[data-theme="nature"] .player{background:linear-gradient(145deg,#f7faef,#e4eddc);border-color:#cbdcc2;color:#6e8873}body[data-theme="nature"] .player.current{background:linear-gradient(145deg,#d8ebd2,#c3dfc1);border-color:#6eaa78;color:#243b2d;box-shadow:0 0 15px #3f805818}body[data-theme="nature"] .player.current::before{color:#3f8058}
+body[data-theme="nature"] .status{background:linear-gradient(90deg,#e2edd8,#f6f8eb,#e2edd8);border-color:#c6d8bd;color:#365a40;box-shadow:none}
+body[data-theme="nature"] .back{background:radial-gradient(ellipse at 50% 45%,#a7ca8c 0 3%,transparent 4%),linear-gradient(145deg,#476f4e,#294c38);border:2px solid #bdd39b;box-shadow:inset 0 0 0 3px #294c38,0 5px 12px #294c3826}body[data-theme="nature"] .back::before{border-color:#a7c68d;border-radius:20px 5px 20px 5px;background:repeating-linear-gradient(45deg,transparent 0 8px,#d9e8ce14 8px 9px)}body[data-theme="nature"] .back::after{content:"❧";color:#dcebc6;border:1px solid #a7c68d;border-radius:50% 8px 50% 8px;background:#8abf9117;text-shadow:none;box-shadow:none}
+body[data-theme="nature"] .front{background:linear-gradient(145deg,#fbfdf3,#e1ebd7);color:#294c38;border-color:#c6d8bd;box-shadow:inset 0 1px #fff}body[data-theme="nature"] .card.matched .front{background:linear-gradient(145deg,#d9ebd2,#b9d8b5);border-color:#7daf7a;box-shadow:0 0 12px #3f80581c}body[data-theme="nature"] body[data-theme="nature"] .modal{background:linear-gradient(145deg,#f8fbf1,#e4eddc);border-color:#c6d8bd;box-shadow:0 25px 70px #294c3830}body[data-theme="nature"] .modal::before{background:linear-gradient(90deg,transparent,#8abf91,#a87931,transparent)}body[data-theme="nature"] .modal p{color:#6e8873}body[data-theme="nature"] .score-row{background:#f8fbf1;border-color:#cbdcc2}body[data-theme="nature"] .score-row b{color:#3f8058}
+@media(max-width:650px){.theme-picker{margin-bottom:17px;padding:10px 12px}.theme-inline span{display:none}.theme-inline .theme-select{min-width:82px;max-width:94px}.actions{align-items:center}}
+
+
+/* Added palettes */
+body[data-theme="sunset"]{color-scheme:dark;--bg:#21131b;--bg-2:#351b24;--panel:#351f2a;--panel-solid:#351f2a;--panel-2:#482532;--panel-3:#5d2e37;--text:#fff0df;--muted:#d8a9a0;--blue:#e8734f;--cyan:#ffad69;--purple:#d85d72;--pink:#ff8491;--green:#84c99b;--red:#ff6f67;--gold:#ffc46b;--line:#ffbd7940;--shadow:0 20px 55px #10070a88;background:radial-gradient(ellipse at 20% 0%,#7e382d,#21131b 65%)}
+body[data-theme="sunset"] .panel{background:linear-gradient(145deg,#482633,#2e1b28);border-color:#e7796650}body[data-theme="sunset"] .card .back{background:linear-gradient(145deg,#a94345,#54253b);border-color:#ffad69;color:#ffe0b2}body[data-theme="sunset"] .card .front{background:linear-gradient(145deg,#fff0d7,#ffc987);border-color:#ef8b66;color:#49242a}
+body[data-theme="ocean"]{color-scheme:dark;--bg:#071e27;--bg-2:#0a3038;--panel:#10333a;--panel-solid:#10333a;--panel-2:#16434a;--panel-3:#1e5559;--text:#e2faf4;--muted:#8ec5c0;--blue:#168c94;--cyan:#53d9c7;--purple:#558db0;--pink:#72cce0;--green:#71d8a7;--red:#ff7c79;--gold:#f1d27b;--line:#75d9d044;--shadow:0 20px 55px #00161999;background:radial-gradient(ellipse at 80% 5%,#0b5960,#071e27 68%)}
+body[data-theme="ocean"] .panel{background:linear-gradient(145deg,#16434a,#0c2b34);border-color:#53d9c755}body[data-theme="ocean"] .card .back{background:linear-gradient(145deg,#087f89,#124452);border-color:#53d9c7;color:#d8fff5}body[data-theme="ocean"] .card .front{background:linear-gradient(145deg,#d7f9ef,#9edfd5);border-color:#53bba9;color:#10363c}
+body[data-theme="candy"]{color-scheme:light;--bg:#fff0f7;--bg-2:#ffe1f0;--panel:#fffafd;--panel-solid:#fffafd;--panel-2:#ffeaf4;--panel-3:#fbd5e9;--text:#542b51;--muted:#9d6c92;--blue:#b85fc5;--cyan:#62c6df;--purple:#bc71d4;--pink:#f480ac;--green:#57ae91;--red:#d85b75;--gold:#d99c46;--line:#d47bbb55;--shadow:0 18px 45px #b7589430;background:radial-gradient(circle at 8% 8%,#ffd3eb,#fff0f7 55%)}
+body[data-theme="candy"] .panel{background:linear-gradient(145deg,#fffafd,#fff0f8);border-color:#efb4d5}body[data-theme="candy"] .card .back{background:linear-gradient(145deg,#e993c5,#a979dd);border-color:#fff;color:#fff}body[data-theme="candy"] .card .front{background:linear-gradient(145deg,#fff,#ffe0ef);border-color:#f19bc5;color:#572f55}
+body[data-theme="mono"]{color-scheme:dark;--bg:#101010;--bg-2:#191919;--panel:#1d1d1d;--panel-solid:#1d1d1d;--panel-2:#282828;--panel-3:#333;--text:#f4ecd6;--muted:#b9ae94;--blue:#aa8d49;--cyan:#e5c875;--purple:#947b44;--pink:#c5a759;--green:#b4aa79;--red:#d27866;--gold:#e5c875;--line:#d2b65a44;--shadow:0 18px 50px #000;background:linear-gradient(145deg,#161616,#090909)}
+body[data-theme="mono"] .panel{background:linear-gradient(145deg,#242424,#171717);border-color:#c3a64d55}body[data-theme="mono"] .card .back{background:repeating-linear-gradient(45deg,#252525 0 7px,#303030 7px 14px);border-color:#c6aa58;color:#e5c875}body[data-theme="mono"] .card .front{background:linear-gradient(145deg,#f2e8c8,#d8c68d);border-color:#c0a24c;color:#202020}
+
+</style>
+</head>
+<body data-theme="modern">
+<div class="app">
+  <header>
+    <h1>🧠 بازی حافظه</h1>
+    <div class="subtitle">به خاطر بسپار، جفت‌ها را پیدا کن و برنده شو</div>
+  </header>
+
+  <section id="setup" class="panel">
+    <div class="theme-picker setup-theme-picker">
+      <label for="themeSelectSetup">🎨 انتخاب تم بازی</label>
+      <select id="themeSelectSetup" class="theme-select">
+        <option value="classic">کلاسیک</option>
+        <option value="modern" selected>مدرن</option>
+        <option value="minimal">ساده</option>
+        <option value="anime">انیمه</option>
+        <option value="neon">نئون</option>
+        <option value="nature">طبیعت</option>
+            <option value="mono">تک‌رنگ</option>
+            <option value="candy">آب‌نبات</option>
+            <option value="ocean">اقیانوس</option>
+            <option value="sunset">غروب</option>
+      </select>
+    </div>
+    <h2>حالت بازی را انتخاب کن</h2>
+    <div class="mode-grid">
+      <button class="mode active" data-mode="solo">
+        <span class="emoji">🧩</span>
+        <strong>تک‌نفره</strong>
+        <small>۵۰ مرحله با سختی تدریجی</small>
+      </button>
+      <button class="mode" data-mode="ai">
+        <span class="emoji">🤖</span>
+        <strong>رقابت با کامپیوتر</strong>
+        <small>یک مسابقه با چهار درجه سختی</small>
+      </button>
+      <button class="mode" data-mode="local">
+        <span class="emoji">👥</span>
+        <strong>چندنفره محلی</strong>
+        <small>رقابت ۲ تا ۴ نفر روی یک دستگاه</small>
+      </button>
+    </div>
+
+    <div class="settings">
+      <div class="field hidden" id="difficultyField">
+        <label for="difficulty">درجه سختی کامپیوتر</label>
+        <select id="difficulty">
+          <option value="easy">آسان</option>
+          <option value="normal" selected>متوسط</option>
+          <option value="hard">سخت</option>
+          <option value="veryhard">خیلی سخت — شافل در پایان هر دور</option>
+        </select>
+      </div>
+
+      <div class="field hidden" id="cardsField">
+        <label for="cardCount">تعداد کارت‌های مسابقه</label>
+        <select id="cardCount">
+          <option value="16">1۶ کارت</option>
+          <option value="24">۲۴ کارت</option>
+          <option value="32">۳۲ کارت</option>
+          <option value="48" selected>۴۸ کارت</option>
+          <option value="64">۶۴ کارت</option>
+        </select>
+      </div>
+
+      <div class="field hidden" id="playerCountField">
+        <label for="playerCount">تعداد بازیکنان</label>
+        <select id="playerCount">
+          <option value="2">۲ نفر</option>
+          <option value="3">۳ نفر</option>
+          <option value="4">۴ نفر</option>
+        </select>
+      </div>
+
+      <div class="field hidden" id="namesField">
+        <label>نام بازیکنان (اختیاری)</label>
+        <div id="nameFields" class="names-grid"></div>
+      </div>
+    </div>
+
+    <div class="start-row">
+      <button id="startBtn" class="primary">شروع بازی</button>
+    </div>
+    <p class="note">بدون فایل تصویر، صدا یا کتابخانه خارجی</p>
+  </section>
+
+  <section id="game" class="panel hidden">
+    <div class="game-head">
+      <h2 id="gameTitle">بازی حافظه</h2>
+      <div class="actions">
+        <label class="theme-inline" for="themeSelectGame">🎨 <span>تم</span>
+          <select id="themeSelectGame" class="theme-select">
+            <option value="classic">کلاسیک</option>
+            <option value="modern">مدرن</option>
+            <option value="minimal">ساده</option>
+            <option value="anime">انیمه</option>
+            <option value="neon">نئون</option>
+            <option value="nature">طبیعت</option>
+            <option value="mono">تک‌رنگ</option>
+            <option value="candy">آب‌نبات</option>
+            <option value="ocean">اقیانوس</option>
+            <option value="sunset">غروب</option>
+          </select>
+        </label>
+        <button id="pauseBtn">⏸ مکث</button>
+        <button id="soundBtn">🔊 صدا</button>
+        <button id="menuBtn">منو</button>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="hud-box">
+        <div class="hud-label" id="levelLabel">مرحله</div>
+        <div class="hud-value gold" id="levelHud">۱ / ۵۰</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">جفت‌های پیدا‌شده</div>
+        <div class="hud-value" id="pairsHud">۰</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">حرکت‌ها</div>
+        <div class="hud-value" id="movesHud">۰</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">زمان</div>
+        <div class="hud-value" id="timerHud">∞</div>
+      </div>
+      <div class="hud-box" id="elapsedHud"><span class="hud-label">⏱ زمان کل</span><span class="hud-value" id="elapsedVal">۰:۰۰</span></div>
+    </div>
+
+    <div class="progress-info">
+      <span id="progressLabel">پیشرفت مرحله</span>
+      <span id="progressText">۰٪</span>
+    </div>
+    <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+
+    <div id="players" class="players hidden"></div>
+    <div id="status" class="status">جفت کارت‌های یکسان را پیدا کن.</div>
+    <main id="board" class="board"></main>
+    <div class="controls">
+      <button id="restartBtn">↻ شروع مجدد</button>
+      <button id="hintBtn" class="purple">💡 راهنما</button>
+    </div>
+    <div id="message" class="message"></div>
+  </section>
+</div>
+
+<div id="pauseOverlay" class="overlay">
+  <div class="modal">
+    <div class="modal-icon">⏸️</div>
+    <h2>بازی متوقف است</h2>
+    <p>هنگام مکث، کارت‌ها قابل انتخاب نیستند و زمان بازی متوقف می‌شود.</p>
+    <div class="modal-actions">
+      <button id="resumeBtn" class="primary">ادامه بازی</button>
+      <button id="pauseRestartBtn">شروع مجدد</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay">
+  <div class="modal">
+    <div id="resultIcon" class="modal-icon">🏆</div>
+    <h2 id="resultTitle">مرحله تمام شد</h2>
+    <div id="resultStars" class="stars"></div>
+    <p id="resultText"></p>
+    <div id="resultScores" class="score-list hidden"></div>
+    <div class="modal-actions">
+      <button id="resultRetryBtn">تلاش دوباره</button>
+      <button id="resultNextBtn" class="success">مرحله بعد</button>
+      <button id="resultMenuBtn">منو</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const THEMES = ["classic","modern","minimal","anime","neon","nature","sunset","ocean","candy","mono"];
+function setTheme(theme, persist=true){
+  if(!THEMES.includes(theme)) theme="modern";
+  document.body.dataset.theme=theme;
+  ["themeSelectSetup","themeSelectGame"].forEach(id=>{const select=$(id);if(select)select.value=theme;});
+  if(persist){try{localStorage.setItem("memoryMatchTheme",theme);}catch(_){}}
+}
+const symbols = [
+  "🍎","🍌","🍉","🍓","🍒","🍍","🥝","🍊","🥑","🍋","🥥","🍇",
+  "🍑","🍐","🥕","🌽","🍆","🥔","🍅","🥠","🥭","🍈","🍏","🍞",
+  "🥐","🥨","🧀","🥞","🧇","🍕","🍔","🍟","🌭","🍿","🍩","🍪",
+  "🎂","🧁","🍫","🍬","🍭","🍮","🍯","🥜","🌰","🍤","🍣","🌮"
+];
+const stageCards = [
+  8,12,16,16,20,24,28,32,32,36,
+  36,40,40,44,44,48,48,52,52,56,
+  56,60,60,64,64,68,68,72,72,72,
+  72,76,76,76,80,80,80,80,80,80,
+  48,52,56,60,64,68,72,76,80,80
+];
+
+let mode="solo",difficulty="normal",competitionSize=48,localCount=2;
+let players=[],currentPlayer=0,level=1;
+let moves=0,matchedPairs=0,hints=0;
+let first=null,second=null,locked=false,paused=false,ended=false;
+let started=false,timeLimit=0,timeLeft=0,moveLimit=0,deckSize=0,elapsedSec=0;
+let timer=null,elapsedTimer=null,aiTimer=null,resolveTimer=null,shuffleTimer=null;
+let soundOn=true,audio=null,roundActors=new Set(),memory=new Map();
+let cardId=0,unlockedLevel=1,bestStars={},gameToken=0,shuffleRunToken=0;
+let busyReason="";
+
+const competition=()=>mode!=="solo";
+const isAI=()=>mode==="ai";
+const current=()=>players[currentPlayer];
+const cards=()=>[...$("board").querySelectorAll(".card")];
+const fa=n=>Number(n).toLocaleString("fa-IR");
+const shuffle=a=>{
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const fmtTime=n=>`${fa(Math.floor(n/60)).padStart(2,"۰")}:${fa(n%60).padStart(2,"۰")}`;
+const safe=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function sound(type){
+  if(!soundOn)return;
+  try{
+    audio ||= new (window.AudioContext||window.webkitAudioContext)();
+    if(audio.state==="suspended")audio.resume();
+    const notes={
+      flip:[420,.06,"sine"],match:[660,.12,"sine"],wrong:[190,.12,"triangle"],
+win:[880,.2,"sine"],
+      lose:[130,.22,"triangle"],hint:[560,.1,"sine"],shuffle:[330,.09,"triangle"]
+    };
+    const [freq,dur,wave]=notes[type]||notes.flip;
+    const o=audio.createOscillator(),g=audio.createGain(),now=audio.currentTime;
+    o.type=wave;o.frequency.setValueAtTime(freq,now);
+    if(["match","win"].includes(type))o.frequency.exponentialRampToValueAtTime(freq*1.35,now+dur);
+    if(["wrong","lose"].includes(type))o.frequency.exponentialRampToValueAtTime(Math.max(60,freq*.65),now+dur);
+    g.gain.setValueAtTime(.0001,now);
+    g.gain.exponentialRampToValueAtTime(.13,now+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,now+dur);
+    o.connect(g);g.connect(audio.destination);o.start(now);o.stop(now+dur+.02);
+  }catch(_){}
+}
+
+function clearTimers(){
+  clearInterval(timer);clearInterval(elapsedTimer);clearTimeout(aiTimer);clearTimeout(resolveTimer);clearTimeout(shuffleTimer);
+  timer=elapsedTimer=aiTimer=resolveTimer=shuffleTimer=null;shuffleRunToken++;
+}
+function resetSelection(){first=second=null}
+function setMode(value){
+  mode=value;
+  document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+  $("difficultyField").classList.toggle("hidden",!isAI());
+  $("cardsField").classList.toggle("hidden",!competition());
+  $("playerCountField").classList.toggle("hidden",mode!=="local");
+  $("namesField").classList.toggle("hidden",mode==="solo");
+  renderNameFields();
+}
+document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
+$("difficulty").addEventListener("change",e=>difficulty=e.target.value);
+$("cardCount").addEventListener("change",e=>competitionSize=+e.target.value);
+$("playerCount").addEventListener("change",renderNameFields);
+
+function renderNameFields(){
+  const root=$("nameFields");root.innerHTML="";
+  if(mode==="solo")return;
+  const count=isAI()?1:+$("playerCount").value;
+  for(let i=0;i<count;i++){
+    const box=document.createElement("div");box.className="field";
+    box.innerHTML=`<label for="name${i}">${i===0?"نام شما":`نام بازیکن ${fa(i+1)}`}</label>
+      <input id="name${i}" maxlength="18" placeholder="${i===0?"بازیکن ۱":`بازیکن ${fa(i+1)}`}">`;
+    root.append(box);
+  }
+  if(isAI()){
+    const box=document.createElement("div");box.className="field";
+    box.innerHTML='<label>حریف</label><input value="کامپیوتر" disabled>';
+    root.append(box);
+  }
+}
+function buildPlayers(){
+  if(mode==="solo")return [{name:"شما",score:0,computer:false}];
+  const name=i=>($(`name${i}`)?.value||"").trim()||`بازیکن ${fa(i+1)}`;
+  if(isAI())return [{name:name(0),score:0,computer:false,hints:2},{name:"کامپیوتر",score:0,computer:true,hints:2}];
+  return Array.from({length:+$("playerCount").value},(_,i)=>({name:name(i),score:0,computer:false,hints:2}));
+}
+function startGame(){
+  clearTimers();gameToken++;players=buildPlayers();currentPlayer=0;level=1;
+  $("setup").classList.add("hidden");$("game").classList.remove("hidden");
+  $("pauseOverlay").classList.remove("show");$("resultOverlay").classList.remove("show");
+  startStage();
+}
+function config(){
+  const count=stageCards[level-1],final=level>=41;
+  return {count,time:final?Math.max(90,190-(level-41)*9):0,
+    moves:final?Math.round(count*1.45):0,hints:level<=20?2:1};
+}
+function stageName(){
+  return ({easy:"آسان",normal:"متوسط",hard:"سخت",veryhard:"خیلی سخت"})[difficulty];
+}
+function gridColumns(count){
+  const w=innerWidth,land=matchMedia("(orientation:landscape)").matches;
+  if(w<420)return count<=16?4:count<=36?5:6;
+  if(w<700)return count<=16?4:count<=32?6:(land?8:7);
+  return count<=16?4:count<=24?6:count<=40?8:10;
+}
+function createDeck(total){
+  if(!competition()){
+    const chosen=shuffle([...symbols]).slice(0,total/2);
+    return shuffle([...chosen,...chosen].map(symbol=>({symbol,kind:"normal"})));
+  }
+  const chosen=shuffle([...symbols]).slice(0,total/2);
+  return shuffle([...chosen,...chosen].map(symbol=>({symbol,kind:"normal"})));
+}
+function createCard(item,index){
+  const el=document.createElement("div");
+  el.className="card";el.dataset.id=String(++cardId);el.dataset.index=index;
+  el.dataset.symbol=item.symbol;el.dataset.kind="normal";
+  el.innerHTML='<div class="card-inner"><div class="face back"></div><div class="face front"></div></div>';
+  el.querySelector(".front").textContent=item.symbol;
+  el.addEventListener("click",()=>chooseCard(el));
+  return el;
+}
+function startStage(){
+  clearTimers();gameToken++;
+  first=second=null;locked=paused=ended=started=false;busyReason="";currentPlayer = 0;
+  moves=matchedPairs=0;roundActors=new Set();memory=new Map();cardId=0;
+  $("pauseOverlay").classList.remove("show");$("resultOverlay").classList.remove("show");
+  const c=competition()?{count:competitionSize,time:0,moves:0,hints:2}:config();
+  deckSize=c.count;elapsedSec=0;$("elapsedVal").textContent=fmtTime(elapsedSec);
+ timeLimit=c.time; timeLeft=c.time; moveLimit=c.moves; hints=c.hints;
+  players.forEach(p=>{ p.score=0; p.hints=c.hints; });
+  $("gameTitle").textContent=competition()?(isAI()?"رقابت با کامپیوتر":"چندنفره محلی"):`مرحله ${fa(level)} از ۵۰`;
+  $("levelLabel").textContent=competition()?"حالت بازی":"مرحله";
+  $("levelHud").textContent=competition()?(isAI()?stageName():`${fa(players.length)} نفر`):`${fa(level)} / ۵۰`;
+  $("pairsHud").textContent="۰";$("movesHud").textContent="۰";
+  $("timerHud").textContent=timeLimit?fmtTime(timeLeft):"∞";
+  $("timerHud").classList.remove("red","gold");
+  $("progressLabel").textContent=competition()?"پیشرفت مسابقه":"پیشرفت مرحله";
+  $("progressText").textContent="۰٪";$("progressBar").style.width="0%";
+  $("hintBtn").disabled=competition()?!(current()?.hints>0):!hints;hintLabel();
+  $("pauseBtn").disabled=false;$("pauseBtn").textContent="⏸ مکث";
+  $("players").classList.toggle("hidden",!competition());renderPlayers();
+  $("board").innerHTML="";
+  $("board").style.gridTemplateColumns=`repeat(${gridColumns(c.count)},minmax(0,1fr))`;
+  createDeck(c.count).forEach((item,i)=>$("board").append(createCard(item,i)));
+  $("status").textContent=competition()?"جفت درست پیدا کن تا نوبتت ادامه پیدا کند.":"جفت کارت‌های یکسان را پیدا کن.";
+  $("message").textContent="";
+  updateHud();
+}
+function reveal(card){card.classList.add("flipped");sound("flip")}
+function remember(card){memory.set(card.dataset.id,{symbol:card.dataset.symbol,kind:card.dataset.kind})}
+
+function chooseCard(card){
+  // The AI timer is cleared when its callback starts. Never use a stale timeout ID
+  // as a reason to block the human player's input.
+  if(locked||paused||ended||card.classList.contains("matched")||card.classList.contains("flipped"))return;
+  if(isAI()&&current().computer)return;
+  if(!started){started=true;startTimer()}
+  reveal(card);if(competition())remember(card);
+  if(!first){first=card;hintLabel();return}
+  second=card;moves++;updateHud();resolvePair();
+}
+function resolvePair(){
+  locked=true;const a=first,b=second;
+  const match=a.dataset.symbol===b.dataset.symbol;
+  if(match){
+    a.classList.add("matched");b.classList.add("matched");
+    matchedPairs++;current().score++;sound("match");$("message").textContent="آفرین! یک جفت پیدا کردی.";
+    renderPlayers();updateHud();
+  }else{
+    sound("wrong");$("message").textContent="این دو کارت یکسان نیستند.";
+  }
+  if(!competition()&&match){
+    resetSelection();
+    if(matchedPairs===config().count/2){finishLevel();return}
+    locked=false;updateHud();return;
+  }
+  if(competition()&&match){
+    resetSelection();
+    if(matchedPairs===deckSize/2){finishCompetition();return}
+    locked=false;
+    $("status").textContent=`${current().name} جفت پیدا کرد و نوبتش ادامه دارد.`;
+     updateHud();hintLabel();scheduleAI();return;
+  }
+  resolveTimer=setTimeout(()=>{
+    if(!a.classList.contains("matched"))a.classList.remove("flipped");
+    if(!b.classList.contains("matched"))b.classList.remove("flipped");
+    resetSelection();
+    if(!competition()){
+      locked=false;
+      if(moveLimit&&moves>=moveLimit){failLevel("تعداد حرکت‌ها تمام شد.");return}
+      $("status").textContent=timeLimit?"قبل از تمام‌شدن زمان، همه جفت‌ها را پیدا کن.":"ادامه بده؛ جفت‌های بیشتری پیدا کن.";
+      return;
+    }
+    if(matchedPairs===deckSize/2){finishCompetition();return}
+    $("status").textContent="اشتباه بود؛ نوبت بعدی.";
+    endTurn();
+  },650);
+}
+function startTimer(){
+  clearInterval(timer);clearInterval(elapsedTimer);
+  let elapsedLast=Date.now();
+  elapsedTimer=setInterval(()=>{
+    if(paused||ended){elapsedLast=Date.now();return}
+    const now=Date.now(),sec=Math.floor((now-elapsedLast)/1000);
+    if(sec<1)return;elapsedLast+=sec*1000;elapsedSec+=sec;$("elapsedVal").textContent=fmtTime(elapsedSec);
+  },250);
+  if(!timeLimit)return;
+  let last=Date.now();
+  timer=setInterval(()=>{
+    if(paused||ended){last=Date.now();return}
+    const now=Date.now(),elapsed=Math.floor((now-last)/1000);
+    if(elapsed<1)return;
+    last+=elapsed*1000;timeLeft=Math.max(0,timeLeft-elapsed);
+    $("timerHud").textContent=fmtTime(timeLeft);
+    $("timerHud").classList.toggle("red",timeLeft<=15);
+    $("timerHud").classList.toggle("gold",timeLeft>15&&timeLeft<=30);
+    if(timeLeft<=0){clearInterval(timer);failLevel("زمان بازی تمام شد.")}
+  },250);
+}
+function updateHud(){
+  $("movesHud").textContent=moveLimit?`${fa(moves)} / ${fa(moveLimit)}`:fa(moves);
+  $("timerHud").textContent=timeLimit?fmtTime(timeLeft):"∞";
+  const total=competition()?deckSize/2:config().count/2;
+  $("pairsHud").textContent=`${fa(matchedPairs)} / ${fa(total)}`;
+  const pct=total?Math.round(matchedPairs/total*100):0;
+  $("progressBar").style.width=pct+"%";$("progressText").textContent=fa(pct)+"٪";
+}
+  function hintLabel(){
+    const available = competition() ? (current()?.computer ? 0 : (current()?.hints || 0)) : hints;
+    $("hintBtn").textContent = `💡 راهنما (${fa(available)})`;
+    $("hintBtn").disabled = available <= 0 || locked || paused || ended || first !== null;
+  }
+
+function useHint(){
+  if(locked||paused||ended||(competition()?(current()?.hints||0)<=0:hints<=0))return;
+  if(first){$("message").textContent="ابتدا انتخاب فعلی را کامل کن، سپس از راهنما استفاده کن.";hintLabel();return}
+  const groups=new Map();
+  cards().filter(c=>!c.classList.contains("matched")&&!c.classList.contains("flipped"))
+    .forEach(c=>{if(!groups.has(c.dataset.symbol))groups.set(c.dataset.symbol,[]);groups.get(c.dataset.symbol).push(c)});
+  const pair=[...groups.values()].find(g=>g.length>=2);if(!pair)return;
+  if(competition())current().hints--;else hints--;hintLabel();if(!started){started=true;startTimer()}
+  pair[0].classList.add("flipped");pair[1].classList.add("flipped");
+  sound("hint");locked=true;$("message").textContent="این جفت را به خاطر بسپار!";
+  resolveTimer=setTimeout(()=>{
+    pair.forEach(c=>{if(!c.classList.contains("matched"))c.classList.remove("flipped")});
+    locked=false;hintLabel();$("message").textContent="";
+  },1000);
+}
+function renderPlayers(){
+  $("players").innerHTML="";
+  players.forEach((p,i)=>{
+    const el=document.createElement("div");
+    el.className="player"+(i===currentPlayer?" current":"");
+    el.innerHTML=`<b>${safe(p.name)}</b><small>${fa(p.score)} جفت</small>`;
+    $("players").append(el);
+  });
+}
+function endTurn(){
+  roundActors.add(currentPlayer);
+  currentPlayer=(currentPlayer+1)%players.length;
+  renderPlayers();updateHud();hintLabel();
+
+  if(isAI()&&difficulty==="veryhard"&&roundActors.size>=players.length){
+    roundActors.clear();beginShuffle();return;
+  }
+  locked=false;
+  hintLabel();
+  $("status").textContent=`نوبت ${current().name} است.`;
+  scheduleAI();
+}
+function beginShuffle(){
+  locked=true;busyReason="shuffle";sound("shuffle");
+  const token=gameToken;
+  $("status").textContent="کارت‌های مخفی در حال جابه‌جایی‌اند…";
+  const hidden=cards().filter(c=>!c.classList.contains("matched")&&!c.classList.contains("flipped"));
+  hidden.forEach((card,i)=>setTimeout(()=>{if(token!==gameToken)return;card.classList.add("shuffling")},i*40));
+  shuffleTimer=setTimeout(()=>{
+    if(token!==gameToken)return;
+    const values=shuffle(hidden.map(c=>c.dataset.symbol));
+    hidden.forEach((card,i)=>{card.dataset.symbol=values[i];card.querySelector(".front").textContent=values[i]});
+    memory.clear();
+    hidden.forEach((card,i)=>setTimeout(()=>{if(token!==gameToken)return;card.classList.remove("shuffling")},i*40));
+    busyReason="";locked=false;
+    $("message").textContent="کارت‌ها جابه‌جا شدند؛ ادامه بده!";
+    $("status").textContent=`نوبت ${current().name} است.`;
+    scheduleAI();updateHud(); hintLabel();
+  },600);
+}
+function scheduleAI(){
+  // Clear the old timer reference immediately; a completed timeout must never
+  // block later clicks from the human player.
+  clearTimeout(aiTimer);aiTimer=null;
+  if(!isAI()||!current().computer||paused||ended||locked)return;
+  aiTimer=setTimeout(()=>{
+    aiTimer=null;
+    if(!isAI()||!current().computer||paused||ended||locked)return;
+    aiTurn();
+  },550);
+}
+function aiTurn(){
+  const available=cards().filter(c=>!c.classList.contains("matched")&&!c.classList.contains("flipped"));
+  if(available.length<2){locked=false;return}
+  locked=true;
+  const a=chooseAI(available,null);
+  reveal(a);remember(a);first=a;
+  aiTimer=setTimeout(()=>{
+    aiTimer=null;
+    if(paused||ended)return;
+    const remaining=cards().filter(c=>c!==first&&!c.classList.contains("matched")&&!c.classList.contains("flipped"));
+    if(!remaining.length){locked=false;resetSelection();return}
+    const b=chooseAI(remaining,first);
+    reveal(b);remember(b);second=b;moves++;updateHud();
+    resolvePair();
+  },600);
+}
+function chooseAI(options,firstCard){
+  const chance={easy:.08,normal:.5,hard:.85,veryhard:1}[difficulty]??.5;
+  if(Math.random()<=chance){
+    if(firstCard&&firstCard.dataset.kind==="normal"){
+      const mate=options.find(c=>{
+        const m=memory.get(c.dataset.id);
+        return m&&m.kind==="normal"&&m.symbol===firstCard.dataset.symbol;
+      });
+      if(mate)return mate;
+    }
+    const known=new Map();
+    options.forEach(c=>{
+      const m=memory.get(c.dataset.id);
+      if(!m||m.kind!=="normal")return;
+      if(!known.has(m.symbol))known.set(m.symbol,[]);
+      known.get(m.symbol).push(c);
+    });
+    const pair=[...known.values()].find(g=>g.length>=2);
+    if(pair)return pick(pair);
+  }
+  return pick(options);
+}
+function finishLevel(){
+  if(ended)return;ended=true;clearInterval(timer);sound("win");
+  const stars=calculateStars();
+  bestStars[level]=Math.max(bestStars[level]||0,stars);
+  unlockedLevel=Math.max(unlockedLevel,Math.min(50,level+1));
+  $("resultIcon").textContent="🏆";
+  $("resultTitle").textContent=level===50?"تبریک! کمپین تمام شد":"مرحله تمام شد!";
+  $("resultStars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+  $("resultText").innerHTML=`همه ${fa(config().count/2)} جفت را در ${fa(moves)} حرکت پیدا کردی.`+
+    (timeLimit?`<br>زمان مصرف‌شده: ${fmtTime(timeLimit-timeLeft)}`:"")+
+    `<br>امتیاز این مرحله: ${fa(bestStars[level])} ستاره`;
+  $("resultScores").classList.add("hidden");
+  $("resultRetryBtn").classList.remove("hidden");
+  $("resultRetryBtn").textContent=level===50?"شروع دوباره":"تلاش دوباره";
+  $("resultNextBtn").classList.toggle("hidden",level===50);
+  $("resultMenuBtn").textContent="منو";
+  $("resultOverlay").classList.add("show");
+}
+function calculateStars(){
+  if(moveLimit){const r=moves/moveLimit;return r<=.65?3:r<=.85?2:1}
+  if(timeLimit){const r=(timeLimit-timeLeft)/timeLimit;return r<=.45?3:r<=.7?2:1}
+  const p=config().count/2;return moves<=p*1.8?3:moves<=p*2.4?2:1;
+}
+function failLevel(reason){
+  if(ended)return;
+  ended=true;locked=true;clearInterval(timer);clearTimeout(resolveTimer);
+  resetSelection();
+  cards().forEach(c=>{if(!c.classList.contains("matched"))c.classList.remove("flipped")});
+  sound("lose");
+  $("resultIcon").textContent="⏰";$("resultTitle").textContent="دوباره تلاش کن";
+  $("resultStars").textContent="";$("resultText").textContent=reason+"؛ مرحله را دوباره شروع کن.";
+  $("resultScores").classList.add("hidden");$("resultRetryBtn").classList.remove("hidden");
+  $("resultRetryBtn").textContent="تلاش دوباره";$("resultNextBtn").classList.add("hidden");
+  $("resultOverlay").classList.add("show");
+}
+function finishCompetition(){
+  if(ended)return;ended=true;locked=true;clearInterval(timer);sound("win");
+  const sorted=[...players].sort((a,b)=>b.score-a.score);
+  const winners=sorted.filter(p=>p.score===sorted[0].score);
+  $("resultIcon").textContent=winners.length>1?"🤝":"🏆";
+  $("resultTitle").textContent=winners.length>1?"مسابقه مساوی شد":`برنده: ${winners[0].name}`;
+  $("resultStars").textContent="";
+  $("resultText").textContent="نتیجه نهایی مسابقه:";
+  $("resultScores").classList.remove("hidden");$("resultScores").innerHTML="";
+  sorted.forEach(p=>{
+    const row=document.createElement("div");row.className="score-row";
+    row.innerHTML=`<span>${safe(p.name)}</span><b>${fa(p.score)} جفت</b>`;
+    $("resultScores").append(row);
+  });
+  $("resultRetryBtn").classList.remove("hidden");$("resultRetryBtn").textContent="مسابقه دوباره";
+  $("resultNextBtn").classList.add("hidden");$("resultOverlay").classList.add("show");
+}
+function retry(){
+  $("resultOverlay").classList.remove("show");
+  if(!competition()&&level===50&&ended&&matchedPairs===config().count/2){startGame();return}
+  startStage();
+}
+function nextLevel(){
+  if(level>=50){startGame();return}
+  level++;$("resultOverlay").classList.remove("show");startStage();
+}
+function menu(){
+  clearTimers();gameToken++;ended=true;paused=false;locked=false;
+  $("setup").classList.remove("hidden");$("game").classList.add("hidden");
+  $("pauseOverlay").classList.remove("show");$("resultOverlay").classList.remove("show");
+}
+function togglePause(){
+  if(ended||locked)return;
+  paused=!paused;$("pauseOverlay").classList.toggle("show",paused);
+  $("pauseBtn").textContent=paused?"▶ ادامه":"⏸ مکث";
+  if(paused){clearTimeout(aiTimer);aiTimer=null;$("status").textContent="بازی متوقف است."}
+  else{$("status").textContent=`نوبت ${current().name} است.`;scheduleAI()}
+  hintLabel();
+}
+function resume(){
+  if(!paused)return;
+  paused=false;$("pauseOverlay").classList.remove("show");$("pauseBtn").textContent="⏸ مکث";
+  scheduleAI();hintLabel();
+}
+$("startBtn").addEventListener("click",startGame);
+$("restartBtn").addEventListener("click",startStage);
+$("pauseRestartBtn").addEventListener("click",startStage);
+$("hintBtn").addEventListener("click",useHint);
+$("pauseBtn").addEventListener("click",togglePause);
+$("resumeBtn").addEventListener("click",resume);
+$("menuBtn").addEventListener("click",menu);
+$("resultRetryBtn").addEventListener("click",retry);
+$("resultNextBtn").addEventListener("click",nextLevel);
+$("resultMenuBtn").addEventListener("click",menu);
+$("soundBtn").addEventListener("click",()=>{
+  soundOn=!soundOn;$("soundBtn").textContent=soundOn?"🔊 صدا":"🔇 صدای خاموش";
+  if(soundOn)sound("flip");
+});
+window.addEventListener("resize",()=>{
+  if(!$("game").classList.contains("hidden"))
+    $("board").style.gridTemplateColumns=`repeat(${gridColumns(cards().length)},minmax(0,1fr))`;
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&!$("game").classList.contains("hidden")&&!ended&&!locked)togglePause();
+});
+["themeSelectSetup","themeSelectGame"].forEach(id=>$(id).addEventListener("change",e=>setTheme(e.target.value)));
+let savedTheme="modern";
+try{const storedTheme=localStorage.getItem("memoryMatchTheme");if(THEMES.includes(storedTheme))savedTheme=storedTheme;}catch(_){}
+setTheme(savedTheme,false);
+setMode("solo");
+</script>
+</body>
+</html>
