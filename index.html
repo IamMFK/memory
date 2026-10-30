@@ -196,6 +196,7 @@ input::placeholder{color:#697a9f}
 .board{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:clamp(6px,1.1vw,11px);width:min(900px,100%);margin:auto;
+  max-height: calc(100vh - 180px);
 }
 .card{
   aspect-ratio:1/1;min-width:0;perspective:900px;cursor:pointer;touch-action:manipulation;
@@ -731,10 +732,26 @@ function stageName(){
   return ({easy:"آسان",normal:"متوسط",hard:"سخت",veryhard:"خیلی سخت"})[difficulty];
 }
 function gridColumns(count){
-  const w=innerWidth,land=matchMedia("(orientation:landscape)").matches;
-  if(w<420)return count<=16?4:count<=36?5:6;
-  if(w<700)return count<=16?4:count<=32?6:(land?8:7);
-  return count<=16?4:count<=24?6:count<=40?8:10;
+  const w = innerWidth, land = matchMedia("(orientation:landscape)").matches;
+  
+  // موبایل باریک (دست‌نخورده تا اندازه کارت‌ها خوانا بماند)
+  if (w < 420) return count <= 16 ? 4 : count <= 36 ? 5 : 6;
+  
+  // تبلت و موبایل‌های عریض / لنداسکیپ
+  if (w < 700) {
+    if (count <= 8) return 4;
+    if (count <= 16) return land ? 6 : 4;
+    return count <= 32 ? 6 : (land ? 8 : 7);
+  }
+  
+  // دسکتاپ و مانیتورهای بزرگ:
+  // برای ۸ کارت، ۴ ستون (۲ ردیف)
+  if (count <= 8) return 4;
+  // برای ۱۲ و ۱۶ کارت، ۶ ستون یا ۸ ستون برای جلوگیری از باد کردن کارت‌ها در عرض
+  if (count <= 12) return 6; // ۲ ردیف ۶ تایی به جای ۳ ردیف ۴ تایی غول‌پیکر
+  if (count <= 18) return 6; // حداکثر ۳ ردیف
+  if (count <= 32) return 8;
+  return 10;
 }
 function createDeck(total){
   if(!competition()){
